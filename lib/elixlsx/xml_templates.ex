@@ -467,13 +467,13 @@ defmodule Elixlsx.XMLTemplates do
     ~S"""
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-    <sheetPr filterMode="false">
-      <pageSetUpPr fitToPage="false"/>
-    </sheetPr>
-    <dimension ref="A1"/>
-    <sheetViews>
-    <sheetView workbookViewId="0"
     """ <>
+      join_custom_xml(sheet.custom_xml, true) <>
+      """
+      <dimension ref="A1"/>
+      <sheetViews>
+      <sheetView workbookViewId="0"
+      """ <>
       make_sheet_show_grid(sheet) <>
       """
       >
@@ -500,6 +500,9 @@ defmodule Elixlsx.XMLTemplates do
       make_data_validations(sheet.data_validations) <>
       """
       <pageMargins left="0.75" right="0.75" top="1" bottom="1.0" header="0.5" footer="0.5"/>
+      """ <>
+      join_custom_xml(sheet.custom_xml) <>
+      """
       </worksheet>
       """
   end
@@ -547,6 +550,31 @@ defmodule Elixlsx.XMLTemplates do
       end
 
     panel_xml <> "<selection " <> selection_pane_attr <> " activeCell=\"A1\" sqref=\"A1\" />"
+  end
+
+  defp join_custom_xml(custom_xml, at_top \\ false) do
+    case at_top do
+      true ->
+        contains_sheet_pr =
+          custom_xml
+          |> Enum.any?(fn x -> String.contains?(x, "sheetPr") end)
+
+        if contains_sheet_pr do
+          custom_xml
+          |> Enum.find(fn x -> String.contains?(x, "sheetPr") end)
+        else
+          """
+          <sheetPr filterMode="false">
+            <pageSetUpPr fitToPage="false"/>
+          </sheetPr>
+          """
+        end
+
+      _ ->
+        custom_xml
+        |> Enum.filter(fn x -> not String.contains?(x, "sheetPr") end)
+        |> Enum.join("\n")
+    end
   end
 
   ###
