@@ -57,6 +57,24 @@ defmodule Elixlsx.Sheet do
     %Sheet{name: name}
   end
 
+  @doc """
+  Function to insert custom XML into the sheet.
+
+  """
+
+  # TODO: Add examples here
+  @spec append_custom_xml(Sheet.t(), String.t()) :: Sheet.t()
+  def append_custom_xml(%Sheet{} = sheet, custom_xml) when is_binary(custom_xml) do
+    updated_custom_xml = sheet.custom_xml ++ [custom_xml]
+    %Sheet{sheet | custom_xml: updated_custom_xml}
+  end
+
+  @spec append_custom_xml(Sheet.t(), list(String.t())) :: Sheet.t()
+  def append_custom_xml(%Sheet{} = sheet, custom_xml_list) when is_list(custom_xml_list) do
+    updated_custom_xml = sheet.custom_xml ++ custom_xml_list
+    %Sheet{sheet | custom_xml: updated_custom_xml}
+  end
+
   defp split_cell_content_props(cell) do
     cond do
       is_list(cell) ->
